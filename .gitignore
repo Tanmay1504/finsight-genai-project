@@ -1,0 +1,48 @@
+# Environment & Secrets
+venv/
+.env
+.env.local
+.env.*.local
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.cursor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Data files
+*.csv
+*.pkl
+*.db
+*.sqlite
+data/
+
+# SEC EDGAR downloaded filings (large, regenerable)
+sec-edgar-filings/
+sec_edgar_filings/
+
+# Test artifacts
+test_setup.py
