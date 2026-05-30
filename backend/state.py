@@ -42,6 +42,9 @@ class AgentState(TypedDict):
     critic_approved: Optional[bool]
     iterations: int
 
+    # Fact verification
+    fact_issues: Annotated[list, add]
+
     # Final output
     final_memo: Optional[str]
 

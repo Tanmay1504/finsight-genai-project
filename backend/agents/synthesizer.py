@@ -1,7 +1,8 @@
 """
-Synthesizer Agent
-==================
-Combines all specialist analyses into a single research memo.
+Synthesizer Agent (Enhanced)
+============================
+Combines all specialist analyses into a polished research memo.
+Now includes explicit requirements so it gets Critic approval on first try.
 """
 import os
 from dotenv import load_dotenv
@@ -17,6 +18,7 @@ LLM = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
 def synthesizer_agent(state: AgentState) -> dict:
     """
     Combines all specialist analyses into a polished research memo.
+    Now includes explicit Critic requirements upfront.
     
     Reads: financial_analysis, sentiment_analysis, risk_analysis, peer_analysis
     Writes: draft_memo
@@ -27,33 +29,62 @@ def synthesizer_agent(state: AgentState) -> dict:
     risk = state.get("risk_analysis", "No risk analysis available")
     peer = state.get("peer_analysis", "No peer analysis available")
 
-    prompt = f"""You are a professional equity research analyst at a major investment bank.
-Your job is to synthesize the following four specialist analyses into a single, 
-cohesive research memo for {ticker}. Write as if this memo will be sent to institutional investors.
+    prompt = f"""You are a professional equity research analyst. Write a comprehensive 
+research memo for {ticker} that will pass strict fact-checking.
 
-Structure your memo with these sections:
-1. EXECUTIVE SUMMARY (2 paragraphs)
-2. FINANCIAL ANALYSIS
-3. SENTIMENT & MANAGEMENT OUTLOOK
-4. RISK ASSESSMENT
-5. COMPETITIVE POSITIONING
-6. INVESTMENT THESIS (concluding paragraph)
+REQUIREMENTS (these will be evaluated by a Critic, so follow them precisely):
+1. FACTUAL GROUNDING: Every claim must be backed by the data provided
+2. STRUCTURE: Follow this exact format with clear section headers
+3. THESIS CLARITY: State a clear investment recommendation or thesis
+4. NO CONTRADICTIONS: Ensure consistency across all sections
+5. COMPLETENESS: Address all key dimensions (valuation, growth, risks, competition)
+6. CITATIONS: Reference the specific analyst insights from the data provided
 
-Keep the memo professional, concise, and actionable.
+Structure your memo EXACTLY like this:
 
-=== FINANCIAL ANALYSIS ===
+=== RESEARCH MEMO: {ticker} ===
+
+EXECUTIVE SUMMARY
+[2 paragraphs covering: company description, key investment thesis, valuation signal]
+
+FINANCIAL ANALYSIS
+[Use specific metrics from financial data: P/E, market cap, dividend yield, 52-week range]
+[Include valuation assessment: Is it expensive, fair, cheap?]
+
+SENTIMENT & MANAGEMENT OUTLOOK
+[From earnings call: What is management confident about?]
+[What risks did management highlight?]
+[Forward guidance assessment]
+
+RISK ASSESSMENT
+[Top 3 critical risks from 10-K filing]
+[How do these compare to peer risk profiles?]
+[Mitigation factors if any]
+
+COMPETITIVE POSITIONING
+[Vs peers: market share, valuation, growth rate]
+[Competitive advantages: brand, products, scale]
+[Vulnerabilities vs competitors]
+
+INVESTMENT THESIS
+[Clear conclusion: BUY / HOLD / SELL rationale]
+[Target thesis based on valuation and growth]
+[Key catalysts or concerns]
+
+=== FINANCIAL DATA PROVIDED ===
 {financial}
 
-=== SENTIMENT ANALYSIS ===
+=== SENTIMENT ANALYSIS PROVIDED ===
 {sentiment}
 
-=== RISK ANALYSIS ===
+=== RISK ANALYSIS PROVIDED ===
 {risk}
 
-=== PEER ANALYSIS ===
+=== COMPETITIVE ANALYSIS PROVIDED ===
 {peer}
 
-=== RESEARCH MEMO ===
+Now write the memo. Be comprehensive, factual, and specific. Every statement should be 
+traceable to the data provided above.
 """
 
     response = LLM.invoke(prompt)
@@ -66,7 +97,7 @@ Keep the memo professional, concise, and actionable.
 if __name__ == "__main__":
     # Standalone test
     print("=" * 70)
-    print("Testing Synthesizer Agent")
+    print("Testing Enhanced Synthesizer (explicit Critic requirements)")
     print("=" * 70)
 
     from backend.agents.data_collector import data_collector_agent
@@ -93,8 +124,7 @@ if __name__ == "__main__":
     }
 
     print("\n[1/3] Collecting data...")
-    data_result = data_collector_agent(test_state)
-    test_state.update(data_result)
+    test_state.update(data_collector_agent(test_state))
 
     print("\n[2/3] Running specialists...")
     test_state.update(financial_analyst_agent(test_state))
@@ -102,11 +132,11 @@ if __name__ == "__main__":
     test_state.update(risk_analyst_agent(test_state))
     test_state.update(peer_analyst_agent(test_state))
 
-    print("\n[3/3] Synthesizing memo...")
+    print("\n[3/3] Synthesizing memo with Critic requirements built-in...")
     test_state.update(synthesizer_agent(test_state))
 
     print("\n" + "=" * 70)
-    print("RESEARCH MEMO (first 500 chars):")
+    print("ENHANCED MEMO (first 500 chars):")
     print("=" * 70)
     print(test_state["draft_memo"][:500] + "...")
     print("\n" + "=" * 70)
