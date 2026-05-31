@@ -46,3 +46,4 @@ sec_edgar_filings/
 
 # Test artifacts
 test_setup.py
+.streamlit/secrets.toml

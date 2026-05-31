@@ -1,25 +1,19 @@
 """
 Specialist Analyst Agents
 ==========================
-Four parallel agents that analyze raw data using the LLM.
-
-- Financial Analyst: analyzes stock metrics, market cap, P/E, etc.
-- Sentiment Analyst: analyzes earnings call tone and management outlook
-- Risk Analyst: analyzes risk factors from 10-K filing
-- Peer Analyst: analyzes competitive position vs peers
+Four parallel agents that analyze raw data using Claude.
 """
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from langchain_groq import ChatGroq
+from langchain_anthropic import ChatAnthropic
 from backend.state import AgentState
 
 
-LLM = ChatGroq(model="llama-3.1-8b-instant", temperature=0)
+LLM = ChatAnthropic(model="claude-opus-4-6", temperature=0)
 
 
-# ===== FINANCIAL ANALYST =====
 def financial_analyst_agent(state: AgentState) -> dict:
     """Analyzes stock metrics and financial health."""
     raw_data = state.get("raw_data", {})
@@ -42,12 +36,10 @@ Analysis:"""
 
     response = LLM.invoke(prompt)
     analysis = response.content.strip()
-
     print(f"[Financial Analyst] Analysis complete ({len(analysis)} chars)")
     return {"financial_analysis": analysis}
 
 
-# ===== SENTIMENT ANALYST =====
 def sentiment_analyst_agent(state: AgentState) -> dict:
     """Analyzes earnings call tone and management sentiment."""
     raw_data = state.get("raw_data", {})
@@ -69,12 +61,10 @@ Sentiment Analysis:"""
 
     response = LLM.invoke(prompt)
     analysis = response.content.strip()
-
     print(f"[Sentiment Analyst] Analysis complete ({len(analysis)} chars)")
     return {"sentiment_analysis": analysis}
 
 
-# ===== RISK ANALYST =====
 def risk_analyst_agent(state: AgentState) -> dict:
     """Analyzes risk factors from 10-K filing."""
     raw_data = state.get("raw_data", {})
@@ -94,12 +84,10 @@ Risk Analysis:"""
 
     response = LLM.invoke(prompt)
     analysis = response.content.strip()
-
     print(f"[Risk Analyst] Analysis complete ({len(analysis)} chars)")
     return {"risk_analysis": analysis}
 
 
-# ===== PEER ANALYST =====
 def peer_analyst_agent(state: AgentState) -> dict:
     """Analyzes competitive position vs peers."""
     raw_data = state.get("raw_data", {})
@@ -122,56 +110,5 @@ Competitive Analysis:"""
 
     response = LLM.invoke(prompt)
     analysis = response.content.strip()
-
     print(f"[Peer Analyst] Analysis complete ({len(analysis)} chars)")
     return {"peer_analysis": analysis}
-
-
-if __name__ == "__main__":
-    # Standalone test
-    print("=" * 70)
-    print("Testing Specialist Agents (requires raw_data from Data Collector)")
-    print("=" * 70)
-
-    from backend.agents.data_collector import data_collector_agent
-
-    test_state: AgentState = {
-        "ticker": "AAPL",
-        "raw_data": {},
-        "financial_analysis": None,
-        "sentiment_analysis": None,
-        "risk_analysis": None,
-        "peer_analysis": None,
-        "draft_memo": None,
-        "critic_feedback": None,
-        "critic_approved": None,
-        "iterations": 0,
-        "final_memo": None,
-        "errors": [],
-    }
-
-    print("\n[1/2] Collecting data...")
-    data_result = data_collector_agent(test_state)
-    test_state.update(data_result)
-
-    print("\n[2/2] Running specialist agents in parallel...")
-    print("-" * 70)
-
-    # In real LangGraph, these run in parallel. For testing, we run sequentially.
-    fin_result = financial_analyst_agent(test_state)
-    sent_result = sentiment_analyst_agent(test_state)
-    risk_result = risk_analyst_agent(test_state)
-    peer_result = peer_analyst_agent(test_state)
-
-    test_state.update(fin_result)
-    test_state.update(sent_result)
-    test_state.update(risk_result)
-    test_state.update(peer_result)
-
-    print("\n" + "=" * 70)
-    print("All specialist analyses complete!")
-    print("=" * 70)
-    print(f"Financial Analysis: {len(test_state['financial_analysis'])} chars")
-    print(f"Sentiment Analysis: {len(test_state['sentiment_analysis'])} chars")
-    print(f"Risk Analysis: {len(test_state['risk_analysis'])} chars")
-    print(f"Peer Analysis: {len(test_state['peer_analysis'])} chars")
