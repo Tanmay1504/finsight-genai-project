@@ -12,7 +12,7 @@ from langchain_groq import ChatGroq
 from backend.state import AgentState
 
 
-LLM = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
+LLM = ChatGroq(model="llama-3.1-8b-instant", temperature=0)
 
 
 def fact_verifier_agent(state: AgentState) -> dict:
